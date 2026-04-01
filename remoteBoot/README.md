@@ -1,4 +1,4 @@
-# Secure Remote Boot & LUKS Unlocker
+# Remote boot & remote LUKS unlocker
 
 ## Overview
 This project documents my custom workflow for remotely waking and decrypting my headless, full disk encrypted (LUKS) homelab server. 
@@ -28,7 +28,7 @@ sequenceDiagram
 ```
 ---
 
-### 2. `connectGateway.sh`
+### 1. `connectGateway.sh`
 This is the script you run from your personal laptop or phone to start the whole process.
 
 ```bash
@@ -38,7 +38,7 @@ This is the script you run from your personal laptop or phone to start the whole
 
 ssh -t user@VPNServ "/home/user/code/bin/totalControl.sh"
 ```
-### 3. `connectGateway.sh`
+### 2. `connectGateway.sh`
 This sits on your VPN gateway. It is the orchestrator that fires the magic packet and waits for the server to wake up.
 
 ```bash
@@ -58,7 +58,7 @@ echo -e "\nSystem is up! Sending unlock command..."
 ~/code/bin/unlockPhi.sh
 ```
 
-### 4. `magik.sh`
+### 3. `magik.sh`
 This also sits on your VPN gateway. It handles the actual WoL broadcast.
 
 ```bash
@@ -69,7 +69,7 @@ This also sits on your VPN gateway. It handles the actual WoL broadcast.
 wakeonlan XX:XX:XX:XX:XX:XX
 ```
 
-### 5. `unlockPhi.sh`
+### 4. `unlockPhi.sh`
 This is the final script on your VPN gateway. It executes the Double-TTY strike to pass the decryption prompt back to you.
 
 ```bash
