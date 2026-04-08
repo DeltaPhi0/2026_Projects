@@ -3,7 +3,7 @@
 ## Overview
 This project is a study in **network isolation and defensive systems.** Instead of using traditional hosting, I host my personal website on my local hardware (**'Phi'**) using a multi layered Docker environment. 
 
-The goal was to achieve a professional website for **€0** while maintaining basically zero trust. By using Cloudflare Tunnels and strict Docker networking, I have exposed the site to the public internet without opening a single port on my home router!
+The goal was to achieve a professional website for **€0**. By using Cloudflare Tunnels and strict Docker networking, I have exposed the site to the public internet without opening a single port on my home router!
 
 ## The "gatekeeper" architecture
 I utilize a "Need to Know" networking model. Even though services reside on the same physical host, they are isolated at the bridge level to prevent lateral movement.
@@ -77,7 +77,7 @@ I modified my host's **UFW** to ensure:
 | :--- | :--- | :--- |
 | **Language** | Rust (Axum) | Secure, memory safe, and high performance backend. |
 | **Domain** | `eu.org` | Permanent €0 community backed TLD(better than some paid options, also). |
-| **Tunnel** | `cloudflared` | Zero-entryway tunnel (no port forwarding). |
+| **Tunnel** | `cloudflared` | Zero entryway tunnel (no port forwarding). |
 | **Proxy** | Nginx Proxy Manager | Traffic brokering and SSL (Let's Encrypt) management. |
 | **Database** | SQLite | Lightweight, encrypted at rest persistence for messages. |
 | **Security** | UFW / Cloudflare | Multi layer perimeter and defense. |
