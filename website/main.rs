@@ -26,7 +26,6 @@ use tower_governor::{governor::GovernorConfigBuilder, GovernorLayer, key_extract
 use axum_client_ip::InsecureClientIp; 
 use validator::Validate;
 
-// ---------- data models ----------
 #[derive(Deserialize, Validate)]
 struct ContactForm {
     #[validate(length(min = 1, max = 100))]
@@ -55,7 +54,7 @@ impl IntoResponse for ErrorResponse {
 async fn main() {
     tracing_subscriber::fmt().init();
 
-    // 1. database setup (uses ENV variable, defaults to local file)
+    // 1. db
     let db_url = env::var("DATABASE_URL").unwrap_or_else(|_| "sqlite:app.db".into());
     let pool = SqlitePool::connect(&db_url).await.expect("DB Connection Failed");
 
@@ -69,7 +68,7 @@ async fn main() {
         )"
     ).execute(&pool).await.unwrap();
 
-    // 2. security headers
+    // 2. headers
     let csp = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; frame-ancestors 'none'; form-action 'self'";
     let csp_header = SetResponseHeaderLayer::overriding(CONTENT_SECURITY_POLICY, HeaderValue::from_str(csp).unwrap());
     let x_frame = SetResponseHeaderLayer::overriding(X_FRAME_OPTIONS, HeaderValue::from_static("DENY"));
@@ -110,12 +109,12 @@ async fn handle_contact(
     Form(payload): Form<ContactForm>,
 ) -> Result<impl IntoResponse, ErrorResponse> {
     
-    // strict input validation
+    // input validation
     if let Err(_) = payload.validate() {
         return Err(ErrorResponse { error: "Invalid Input".into(), fields: None });
     }
 
-    // SQL injection protected (using .bind)
+    // injection protected (using .bind)
     let _ = sqlx::query("INSERT INTO messages (name, email, message) VALUES (?, ?, ?)")
         .bind(&payload.name)
         .bind(&payload.email)
