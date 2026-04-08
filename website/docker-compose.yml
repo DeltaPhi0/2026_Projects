@@ -1,0 +1,29 @@
+services:
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
+    restart: always
+    command: tunnel run
+    volumes:
+      - /path/to/cloudflare/vars
+    networks:
+      - tunnel-net
+
+  crimson:
+    build: path/to/Dockerfile/folder
+    container_name: crimson
+    restart: unless-stopped
+    networks:
+      - tunnel-net2
+#    ports:
+#      - "3001:3001"
+    volumes:
+      - /path/to/data:/app/data
+    environment:
+      - DATABASE_URL=sqlite:/app/data/db
+
+networks:
+  tunnel-net2:
+    external: true
+  tunnel-net:
+    external: true
