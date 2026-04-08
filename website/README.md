@@ -12,7 +12,7 @@ I utilize a "Need to Know" networking model. Even though services reside on the 
 1. **Public Layer**: Traffic hits the `eu.org` domain, proxied through Cloudflare.
 2. **Tunnel Layer**: The `cloudflared` container establishes an outbound connection. It sits on **Network A**.
 3. **Proxy Layer**: **Nginx Proxy Manager (NPM)** acts as the sole bridge. It is the only container with interfaces on both **Network A** and **Network B**.
-4. **Application Layer**: The Nginx web server sits on **Network B**. It has no direct path to the tunnel or the outside world.
+4. **Application Layer**: The **Rust/Axum backend** and Nginx static server sit on Network B, with no direct path to the tunnel or the internet.
 
 ```mermaid
 graph LR
@@ -22,12 +22,13 @@ graph LR
 
     subgraph Phi_Host [Home Server: Phi]
         direction TB
-        subgraph Net_A [Docker Network: Tunnel-Inside]
+        subgraph Net_A [Docker Network: Tunnel inside]
             Tunnel[cloudflared]
         end
 
-        subgraph Net_B [Docker Network: Web-Private]
-            Web[Nginx Web Server]
+        subgraph Net_B [Docker Network: Web private]
+            Web[Nginx/Static]
+            App[Rust Axum Backend]
         end
 
         Proxy[Nginx Proxy Manager]
@@ -36,7 +37,7 @@ graph LR
     CF -->|Encrypted Tunnel| Tunnel
     Tunnel --- Proxy
     Proxy --- Web
-
+    Proxy --- App
 ```
 
 ## Key technical implementation
@@ -47,13 +48,24 @@ To ensure maximum security, I configured the `docker-compose.yml` to define stri
 * **The isolation**: The `cloudflared` container and the website container cannot communicate directly.
 * **The bridge**: Traffic must be brokered through the **NPM**, allowing me to inspect and control flow between the two segments.
 
-### 2. Firewall hardening
+### 2. Backend (Rust/Axum)
+The backend is built with memory safety and security as priorities:
+
+* **Rate limiting**: Integrated `tower-governor` to enforce a **1MB + 1 request/60s/IP** limit on the contact form to prevent automated spam and DOS.
+* **Input validation**: All user input is sanitized and validated via the `validator` crate before reaching the database.
+* **Security headers**: Explicitly injected `Content-Security-Policy`, `X-Frame-Options`, and `X-Content-Type-Options` to mitigate XSS and Clickjacking.
+
+### 3. Container security
+* **Multistage builds**: The `Dockerfile` uses a builder stage to compile the binary; the final runtime image contains **zero source code** and no build tools, drastically reducing the attack surface.
+* **Non root execution**: The application runs under a dedicated `appuser`, ensuring that a process breach does not grant root access to the container or host.
+
+### 4. Firewall hardening
 I modified my host's **UFW** to ensure:
 
 * **Internal routing only**: Nginx is restricted to internal Docker network traffic.
 * **No open ports**: Since I use a Cloudflare Tunnel, I have **0 open ports** on my router. This effectively "cloaks" my home IP from potential botnets and scanners.
 
-### 3. SSL and edge security
+### 5. SSL and edge security
 * **Domain**: Secured a free community TLD via `eu.org`.
 * **Encryption**: Implemented full SSL/TLS Let's Encrypt.
 
@@ -63,13 +75,13 @@ I modified my host's **UFW** to ensure:
 
 | Component | Choice | Purpose |
 | :--- | :--- | :--- |
-| **Domain** | `eu.org` | Permanent €0 TLD. |
-| **Tunnel** | `cloudflared` | Eliminates the need for port forwarding. |
-| **Proxy** | Nginx Proxy Manager | Centralized traffic brokering and SSL management. |
-| **Web Server** | Nginx (Alpine) | Lightweight, hardened container for static content. |
-| **Backend** | Rust | Secure, memory safe, fast and fun to code. |
-| **Security** | UFW / Cloudflare | Multi layer perimeter defense. |
+| **Language** | Rust (Axum) | Secure, memory safe, and high performance backend. |
+| **Domain** | `eu.org` | Permanent €0 community backed TLD(better than some paid options, also). |
+| **Tunnel** | `cloudflared` | Zero-entryway tunnel (no port forwarding). |
+| **Proxy** | Nginx Proxy Manager | Traffic brokering and SSL (Let's Encrypt) management. |
+| **Database** | SQLite | Lightweight, encrypted at rest persistence for messages. |
+| **Security** | UFW / Cloudflare | Multi layer perimeter and defense. |
 
 ---
 
-> **SOC Analyst Perspective**: This project demonstrates my ability to manage the **"Attack surface."** By treating a simple website as a high-security asset, I practiced the core principles of defensive networking: **isolation**, **least privilege**, and **encrypted transport**.
+> **SOC Analyst Perspective**: This project demonstrates the practical application of **Attack Surface Reduction**. By treating a simple personal site with the same rigor as an enterprise application: using isolation, least privilege, and deterministic builds, I have created a resilient environment that is basically "cloaked".
