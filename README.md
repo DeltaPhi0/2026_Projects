@@ -10,34 +10,34 @@ I believe the best way to learn complex systems is to build them, break them, an
 
 ## Directory Index
 
-Below are the active projects and systems currently documented in this repository. Click on any folder to read its specific documentation, architecture layout, and source code.
+Below are the active projects and systems currently documented in this repository. Click on any folder to read its specific documentation, architecture and source code.
 
-### 1. [Remote Boot & LUKS Unlocker](./remoteBoot)
-A custom workflow designed to securely manage an encrypted, headless server. It features Wake-on-LAN triggering via a VPN gateway and a secure Dropbear SSH implementation within the initramfs to remotely pass LUKS decryption keys during the boot sequence.
+### 1. [Remote Boot and LUKS Unlocker](./remoteBoot)
+A custom bash script designed to manage an encrypted, headless server. It features Wake on LAN triggering via a VPN gateway and a Dropbear initramfs SSH implementation to remotely pass LUKS decryption keys during the boot sequence.
 
-### 2. [Automated Cloud Backup Service](./automatedBackup)
-A custom Bash automation service that ensures my critical homelab data is never lost. It handles the compression of system configurations and Docker files into timestamped archives, followed by secure, automated synchronization to an off-site cloud provider (in my case, google's).
+### 2. [Automated Cloud Backup](./automatedBackup)
+A custom Bash automation script that ensures my critical homelab data is never lost. It handles the compression of system configurations and Docker files into timestamped archives, followed by automated synchronization to an off site cloud provider (in my case, google's).
 
-### 3. [Docker Infrastructure as Code](./docker)
-A sanitized look at my containerized homelab environment. This section breaks down how I use Docker Compose to manage a fleet of over 20 active containers, including secure routing via Nginx Proxy Manager, internal network isolation, and database management.
+### 3. [Docker Infrastructure](./docker)
+A look at my containerized homelab environment. This section breaks down how I use Docker Compose to manage over 30 active containers, including secure routing via Nginx Proxy Manager, internal network isolation, and databases management.
 
 ### 4. [My personal zero cost Website](./website)
-After finding out about [eu.org](https://nic.eu.org/), I knew I had to build my own website. While my passion remains in automation and  uilding tools, this project was a great dive into full stack deployment and public facing security.
+After finding out about [eu.org](https://nic.eu.org/), I knew I had to build my own website. While my passion remains in automation and building tools, this project was a great dive into full stack deployment and public facing security.
 
 ---
 
-## Live Dashboard and container monitoring preview
+## Live dashboard and container monitoring preview
 
 ![Homarr - Real time system metrics, heavily edited](./screenshots/homarr.png)
 
-*My Homarr dashboard showing hardware usage, active Docker containers, service URLs, and media library status + much more.*
+*My Homarr dashboard showing hardware usage, active Docker containers, service URLs, and  much more.*
 
 ![Dozzle - Real time container logs and resource usage](./screenshots/dozzle.png)
 
 *Dozzle dashboard showing multiple active containers, CPU/RAM metrics, and log streams for services like Immich, Flaresolverr,  Homarr etc.*
 
 ---
-## My Methodology
+## My methodology
 
 When building these projects, I try to adhere to the following principles:
 * **Security First:** Moving away from default credentials, utilizing key based authentication, and encrypting data at rest.
