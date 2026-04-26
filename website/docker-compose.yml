@@ -19,6 +19,7 @@ services:
 #      - "3001:3001"
     volumes:
       - /path/to/data:/app/data
+      - /path/to/live/site:/app/public
     environment:
       - DATABASE_URL=sqlite:/app/data/db
 
